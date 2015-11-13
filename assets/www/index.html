@@ -14,18 +14,25 @@
 <script type="text/javascript" src="js/cordova-1.5.0.js"></script>
 
 <script type="text/javascript">
+	/**
+	 * AppGeolocationMap
+	 */
 	var map;
 	var marker;
 	var infowindow;
 	var watchID;
+	var msg;
 
 	$(document).ready(function() {
 		document.addEventListener("deviceready", onDeviceReady, false);
-		//for testing in Chrome browser uncomment
-		//onDeviceReady();
+		// Register the event listener
+		document.addEventListener("backbutton", onBackKeyDown, false);
+
+		// for testing in Chrome browser uncomment
+		// onDeviceReady();
 	});
 
-	//PhoneGap is ready function
+	// PhoneGap is ready function
 	function onDeviceReady() {
 		$(window).unbind();
 		$(window).bind('pageshow resize orientationchange', function(e) {
@@ -66,9 +73,10 @@
 		map = new google.maps.Map(document.getElementById("map"), myOptions);
 
 		google.maps.event.addListenerOnce(map, 'tilesloaded', function() {
-			//get geoposition once
-			//navigator.geolocation.getCurrentPosition(geo_success, geo_error, { maximumAge: 5000, timeout: 5000, enableHighAccuracy: true });
-			//watch for geoposition change
+			// get geoposition once
+			// navigator.geolocation.getCurrentPosition(geo_success, geo_error, {
+			// maximumAge: 5000, timeout: 5000, enableHighAccuracy: true });
+			// watch for geoposition change
 			watchID = navigator.geolocation.watchPosition(geo_success,
 					geo_error, {
 						maximumAge : 5000,
@@ -79,7 +87,7 @@
 	}
 
 	function geo_error(error) {
-		//comment
+		// comment
 		alert('code: ' + error.code + '\n' + 'message: ' + error.message + '\n');
 	}
 
@@ -92,21 +100,21 @@
 				+ 'Longitude: ' + position.coords.longitude + '<br>'
 				+ 'Altitude: ' + position.coords.altitude + '<br>'
 				+ 'Accuracy: ' + position.coords.accuracy + '<br>'
-				+ 'Altitude Accuracy: ' + position.coords.altitudeAccuracy + '<br>'
-				+ 'Heading: ' + position.coords.heading + '<br>'
-				+ 'Speed: ' + position.coords.speed + '<br>' 
-				+ 'Timestamp: ' + new Date(position.timestamp));
+				+ 'Altitude Accuracy: ' + position.coords.altitudeAccuracy
+				+ '<br>' + 'Heading: ' + position.coords.heading + '<br>'
+				+ 'Speed: ' + position.coords.speed + '<br>' + 'Timestamp: ' + new Date(
+				position.timestamp));
 
 		var point = new google.maps.LatLng(position.coords.latitude,
 				position.coords.longitude);
 		if (!marker) {
-			//create marker
+			// create marker
 			marker = new google.maps.Marker({
 				position : point,
 				map : map
 			});
 		} else {
-			//move marker to new position
+			// move marker to new position
 			marker.setPosition(point);
 		}
 		if (!infowindow) {
@@ -121,17 +129,29 @@
 		});
 	}
 
-	//fechar do app
+	// show Info user
+	function showInfoUserHandler(msg) {
+		msgInfoUser = document.getElementById("infoUser").value;
+		document.getElementById("infoUser").innerText = msgInfoUser;
+	}
+
+	// Handle the back button
+	function onBackKeyDown() {
+		showConfirm();
+	}
+
+	// showConfirm exit app
+	function showConfirm() {
+		navigator.notification.confirm('Exit?', exitFromApp,
+				'Geolocation Map', 'Cancel, OK' // buttonLabels
+		);
+	}
+
+	// exit app
 	function exitFromApp(buttonIndex) {
 		if (buttonIndex === 2) {
 			navigator.app.exitApp();
 		}
-	}
-	//confirmar sair do app
-	function showConfirm() {
-		navigator.notification.confirm('Deseja Realmente Sair?', exitFromApp,
-				'Geolocation Map', 'Cancelar,OK' // buttonLabels
-		);
 	}
 </script>
 </head>
@@ -140,7 +160,7 @@
 	<div data-role="page" id="index">
 
 		<!-- header -->
-		<div data-role="header" data-theme="a" >
+		<div data-role="header" data-theme="a">
 			<a data-role="button" data-icon="back" onclick="showConfirm()"
 				data-iconpos="right" class="ui-btn-right">Sair</a>
 			<h3>Geolocation Map</h3>
@@ -154,8 +174,9 @@
 		<!-- footer -->
 		<div data-role="footer" data-theme="a" data-position="fixed">
 			<div align="center" style="font-size: 12px; color: silver;">
-				<p>Localizando...</p>
+				<div id="infoUser"></div>
 			</div>
 		</div>
 	</div>
+</body>
 </html>
